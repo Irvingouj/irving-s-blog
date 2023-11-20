@@ -5,6 +5,4 @@ draft = false
 +++
 ## Introduction
 
-This is **bold** text, and this is *emphasized* text.
-
-Visit the [Hugo](https://gohugo.io) website!
+Hello, This is Irving, a software developer, proudly working at Devolutions.

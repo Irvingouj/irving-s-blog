@@ -1,4 +1,4 @@
-baseURL = 'https://example.org/'
+baseURL = 'https://blog.Irvingou.com/'
 languageCode = 'en-us'
 title = 'Irvings Blog'
 theme = "paper"
@@ -14,7 +14,7 @@ theme = "paper"
   #rss = true                                # show rss icon
 
   # home page profile
-  avatar = 'GRAVATAR_EMAIL'                 # gravatar email or image url
+  avatar = 'oujunyiirving@gmail.com'                 # gravatar email or image url
   name = 'Irving OU'
   bio = 'Bio'
 
@@ -24,5 +24,6 @@ theme = "paper"
   disablePostNavigation = false              # disable post navigation
   monoDarkIcon = true                       # show monochrome dark mode icon
   gravatarCdn = 'https://cdn.v2ex.com/gravatar/'         # e.g. 'https://cdn.v2ex.com/gravatar/'
-  graphCommentId = "YOUR_GRAPH_COMMENT_ID"  # use graph comment (disqus alternative)
+  #graphCommentId = "YOUR_GRAPH_COMMENT_ID"  # use graph comment (disqus alternative)
   math = true                               # enable KaTeX math typesetting globally
+  comments = false     
