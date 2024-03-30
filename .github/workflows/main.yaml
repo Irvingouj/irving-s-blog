@@ -1,0 +1,36 @@
+name: Build and Publish Docker Image
+
+on:
+  push:
+    branches:
+      - master # Adjust this as necessary for your workflow
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+      with:
+        submodules: 'recursive' # This will clone submodules recursively
+
+    - name: Set up Hugo
+      uses: peaceiris/actions-hugo@v2
+      with:
+        hugo-version: 'latest'
+
+    - name: Build Site with Hugo
+      run: hugo
+
+    - name: Build Docker Image
+      run: docker build . --file Dockerfile --tag irvingou/irvings-blog:latest # Replace with your DockerHub username and image name
+
+    - name: Log in to DockerHub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }} # Set your DockerHub username in GitHub secrets
+        password: ${{ secrets.DOCKER_PASSWORD }} # Set your DockerHub password in GitHub secrets
+
+    - name: Publish Docker Image
+      run: docker push irvingou/irvings-blog:latest # Replace with your DockerHub username and image name
