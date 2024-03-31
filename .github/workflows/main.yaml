@@ -39,4 +39,4 @@ jobs:
       uses: distributhor/workflow-webhook@v3
       with:
         webhook_url: ${{ secrets.WEBHOOK_URL }}
-        webhook_auth: ${{ secrets.WEBHOOK_SECRET }}
+        curl_opts: '-H "Authorization : ${{ secrets.WEBHOOK_SECRET }}"'
