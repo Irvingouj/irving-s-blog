@@ -103,7 +103,8 @@ The borrowing concept in Rust enforces the ownership rules at compile time, ensu
 One may talk about this topic goes all the way done to how computer works. For the sake of the introductive nature of this blog, we won't dig too deep.
 
 ## The Clone and Copy Trait
-The following topic assumes you have basic knowledge of trait. One might noticed the following code works as well.
+Trait is like a interface in Java or Typescript, which many differences, but let's foucus on the topic today. I will put up a different blog about Trait later.
+One might noticed the following code works as well.
 ```
 fn main() {
     //...
@@ -113,4 +114,20 @@ fn main() {
 }
 ```
 
-**Wait, why can we use the person_refernece twice? Isn't it a variable too?**. You are absolutly correct. 
+Isn't it wired? You see, up there, in the second example, the variable is **consumed** and will throw a compile error, but here, the person_refence can be passed to the greet function twice without causing any problem.
+
+The Secret is the **Copy** Trait. If you go to the offical documentation of Rust std, you will see that the reference implements the Copy Trait. That means it is automatically **copied** instead of **moved** every time we use it or assigne it to anohter variable.
+
+In fact, all the primitive types implements the **Copy** trait. We could implement the **Copy** trait for our `Person` sturct as well.
+
+```rust
+#[derive(Debug,Clone,Copy)]
+struct Person {
+    name: String,
+    age: u32,
+}
+```
+
+One may find out this will not work as well, if you try to compile it, the compiler will tell you that the String type does not implement Copy. This is by design. You see, String a complicated data type, it is a value that can grow and shrink in size. It is also heap allocated, which means it is expensive to create. In many suituations, we need to double think weather or not we want to copy the string, be cause it could be distructively expensive for many applications.
+
+
