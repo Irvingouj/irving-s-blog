@@ -4,7 +4,7 @@ date = 2024-03-31T08:50:36-05:00
 draft = false
 +++
 
-The Borrow Checker has always been the #1 enemy for programmers who are trying to learn Rust for the first time. In this post, I am going to provide a simple mental model to understand its usage and explain some concepts that are specific to Rust.
+The Borrow Checker has always been the #1 enemy for programmers who are trying to learn Rust for the first time. In this post, I will provide a simple mental model to understand its usage and explain some concepts that are specific to Rust.
 
 This article assumes that the audience has basic programming knowledge, including experience with C/C++ pointer and reference manipulations.
 
@@ -12,7 +12,7 @@ Let's dive in.
 
 ## Move and Consume
 
-"Move", "Consume" are terms specific to Rust; we don't hear these words being used in any other language. In short, **a value is moved when it is assigned to another variable, and a value is consumed when it is passed into a function**. **A variable OWNS the value it gets assigned to** All variables subject to the ownership model. Let's examine a classic example:
+"Move" and "Consume" are terms specific to Rust; we don't hear these words being used in any other language. In short, **a value is moved when it is assigned to another variable, and a value is consumed when it is passed into a function**. **A variable OWNS the value it gets assigned to**. All variables are subject to the ownership model. Let's examine a classic example:
 
 ```rust
 #[derive(Debug)]
@@ -31,7 +31,7 @@ fn main() {
 }
 ```
 
-In the above example, the value person is moved from `x` to the variable `y`. You can think of this as `x` **owns** the value of a person. If the person is **moved** to another variable, then `x` no longer has anything, hence we cannot use `x` ever again.
+In the above example, the Person value is moved from `x` to the variable `y`. You can think of this as `x` **owns** the Person value. If the Person is **moved** to another variable, then `x` no longer has anything, hence we cannot use `x` ever again.
 
 Let's look at an example of **consume**.
 
@@ -80,54 +80,102 @@ Your critique is absolutely valid. This is not how one should write their code. 
 In system programming languages, we always have a way to obtain the address of our value, which is what we call a **reference**. In the above `Person` struct example, we do not necessarily need to consume the value `person`; we can alter our function signature to accomplish the same thing without consumption.
 
 ```rust
-fn greet(person_param: &Person) {
+fn greet_reference(person_param: &Person) {
     println!("Hello, {}! You are {} years old.", person_param.name, person_param.age);
 }
 ```
-In here, the symbol `&Person` represents a reference type to a person. The `&` is also a operator, it can be used on any value to create it's Reference type. For example
+In here, the symbol `&Person` represents a reference type to a person. The `&` is also an operator; it can be used on any value to create its Reference type. For example,
 ```rust
-let person_reference = &person
+let person_reference = &person;
 ```
 `person_reference` is of type `&Person`, and it is exactly what the `greet` function is looking for.
-We can invoke this function as many times as we want by using a reference. Because creating a reference is cheap and  In this case, we say the greet function **borrows** the value person.
+We can invoke this function as many times as we want by using a reference. Because creating a reference is cheap. In this case, we say the greet function **borrows** the value person.
 
 ```rust
 fn main() {
     //...
-    greet(&person); 
-    greet(&person); 
+    greet_reference(&person); 
+    greet_reference(&person); 
 }
 ```
 The borrowing concept in Rust enforces the ownership rules at compile time, ensuring that data races and invalid memory references are prevented. Borrowing can be either immutable or mutable, with strict rules governing their usage.
 
-One may talk about this topic goes all the way done to how computer works. For the sake of the introductive nature of this blog, we won't dig too deep.
+One may talk about this topic all the way down to how computers work. For the sake of the introductory nature of this blog, we won't dig too deep.
 
 ## The Clone and Copy Trait
-Trait is like a interface in Java or Typescript, which many differences, but let's foucus on the topic today. I will put up a different blog about Trait later.
-One might noticed the following code works as well.
-```
+A trait is like an interface in Java or TypeScript, with many differences, but let's focus on the topic today. I will put up a different blog about Trait later.
+One might have noticed the following code works as well.
+``` rust
 fn main() {
     //...
-    let person_refernece= &person  
-    greet(person_refernece); // we use the reference once
-    greet(person_refernece); // we use the reference again.
+    let person_reference = &person  
+    greet_reference(person_reference); // we use the reference once
+    greet_reference(person_reference); // we use the reference again.
 }
 ```
 
-Isn't it wired? You see, up there, in the second example, the variable is **consumed** and will throw a compile error, but here, the person_refence can be passed to the greet function twice without causing any problem.
+Isn't it weird? You see, up there, in the second example, the variable is **consumed** and will throw a compile error, but here, the person_reference can be passed to the greet function twice without causing any problem.
 
-The Secret is the **Copy** Trait. If you go to the offical documentation of Rust std, you will see that the reference implements the Copy Trait. That means it is automatically **copied** instead of **moved** every time we use it or assigne it to anohter variable.
+The Secret is the **Copy** Trait. If you go to the official documentation of Rust std, you will see that the reference implements the Copy Trait. That means it is automatically **copied** instead of **moved** every time we use it or assign it to another variable.
 
-In fact, all the primitive types implements the **Copy** trait. We could implement the **Copy** trait for our `Person` sturct as well.
+In fact, all the primitive types implement the **Copy** trait, and **A struct can implement Copy if and only if all of its components implement Copy**. Our `Person` struct cannot, and will never be able to implement Copy. If you try to derive it like the following, the compiler will complain about `name: String` does not implement Copy.
 
 ```rust
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug, Clone, Copy)]
 struct Person {
-    name: String,
+    name: String, //<< --------------- does not compile here
     age: u32,
 }
 ```
 
-One may find out this will not work as well, if you try to compile it, the compiler will tell you that the String type does not implement Copy. This is by design. You see, String a complicated data type, it is a value that can grow and shrink in size. It is also heap allocated, which means it is expensive to create. In many suituations, we need to double think weather or not we want to copy the string, be cause it could be distructively expensive for many applications.
+You see, String is a complicated data type; it is a value that can grow and shrink in size. It is heap allocated, which means it is expensive to create and copy around. So is Vec and other heap allocated or partly heap allocated data types.
 
 
+Note that you cannot even implement `Copy` trait manually, as Copy is just a marker trait, meaning it does not have any function associated with it.
+
+However, one could indeed derive the `Clone`. `Clone` allows you to explicitly clone your value, which may or may not be expensive. Rust does not allow you to reimplement `Copy`, but you can implement `Clone` in whatever way you want. Here's an example
+```rust
+#[derive(Debug, Clone)]
+struct Person {
+    name: String, 
+    age: u32,
+}
+```
+
+and when you want to use it, simply call clone every time.
+
+```rust
+fn main() {
+    let person = Person {
+        name: String::from("John"),
+        age: 30,
+    };
+
+    let person_clone = person.clone();
+    greet(person_clone);
+    greet(person);
+}
+
+fn greet(person_param: Person) {
+    // .. consumes Person
+}
+```
+
+## Take Advantage of Ownership Models
+There are design patterns that can only be used with Rust by taking advantage of the ownership model.
+
+Think about a situation like this. You have two functions, `step1` and `step2`, where you want the user to call your functions in order, and call `step2` only once. You can achieve it by using an empty struct.
+```rust
+pub struct Step1Finished;
+pub fn step1() -> Step1Finished {
+    //...
+    Step1Finished
+}
+
+pub fn step2(_: Step1Finished) {
+    // do the rest for step 2.
+}
+```
+Since step2 takes the ownership of `Step1Finished`, the Rust ownership rule will guarantee that `step2` must be called with a `step1` in advance, and a `step1` can only be followed by a `step2`, not a `step3` or `step4`.
+
+Thank you very much for reading. I will put up more content like this in my blog. Please send me an email if you find anything wrong with my blog.
