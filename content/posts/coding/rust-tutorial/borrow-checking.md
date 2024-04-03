@@ -118,7 +118,7 @@ Isn't it weird? You see, up there, in the second example, the variable is **cons
 
 The Secret is the **Copy** Trait. If you go to the official documentation of Rust std, you will see that the reference implements the Copy Trait. That means it is automatically **copied** instead of **moved** every time we use it or assign it to another variable.
 
-In fact, all the primitive types implement the **Copy** trait, and **A struct can implement Copy if and only if all of its components implement Copy**. Our `Person` struct cannot, and will never be able to implement Copy. If you try to derive it like the following, the compiler will complain about `name: String` does not implement Copy.
+In fact, all the primitive types implement the **Copy** trait, and **A struct can implement Copy if and only if all of its components implement Copy**. Our `Person` struct cannot, and will never be able to implement Copy nor can we derive it. If you try to derive it like the following, the compiler will complain about `name: String` does not implement Copy.
 
 ```rust
 #[derive(Debug, Clone, Copy)]
@@ -129,7 +129,6 @@ struct Person {
 ```
 
 You see, String is a complicated data type; it is a value that can grow and shrink in size. It is heap allocated, which means it is expensive to create and copy around. So is Vec and other heap allocated or partly heap allocated data types.
-
 
 Note that you cannot even implement `Copy` trait manually, as Copy is just a marker trait, meaning it does not have any function associated with it.
 
@@ -169,7 +168,7 @@ Think about a situation like this. You have two functions, `step1` and `step2`, 
 pub struct Step1Finished;
 pub fn step1() -> Step1Finished {
     //...
-    Step1Finished
+    Step1Finished //<< --- This is return statement in Rust in case you don't know
 }
 
 pub fn step2(_: Step1Finished) {
@@ -178,4 +177,7 @@ pub fn step2(_: Step1Finished) {
 ```
 Since step2 takes the ownership of `Step1Finished`, the Rust ownership rule will guarantee that `step2` must be called with a `step1` in advance, and a `step1` can only be followed by a `step2`, not a `step3` or `step4`.
 
-Thank you very much for reading. I will put up more content like this in my blog. Please send me an email if you find anything wrong with my blog.
+## Conclusion
+In conclusion, Rust's variable is an **owner** to a value. You may `move` the value to another variable, `consume` it in a function and give or not give it back later. You may also `borrow` it, use its reference for different things, and you can derive `Copy` or `Clone` traits wherever appropriate to use the same value in different places.
+
+As a side note, this blog does not introduce anything about mutibility. It is another important topic and work hand in hand with ownership models. We will talk about it in later chapter.
