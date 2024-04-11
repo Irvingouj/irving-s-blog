@@ -53,7 +53,7 @@ fn greet(person_param: Person) {
 
 In this example, the `person` variable is **consumed** by the `greet` function. You can think of it as **move** as well. It is as if the value `person` is **moved** into `person_param` in the `greet` function. In fact, that is what the compiler will tell you as well.
 
-Interestingly, if this concept is called borrow, we can absolutely ask the function to give it back (return it). 
+Also, we can ask the function to return it to help us regain the ownership of a value.
 
 ```rust
 fn main() {
